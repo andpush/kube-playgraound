@@ -1,0 +1,4 @@
+kube/SampleController.class
+kube/ServiceProperties.class
+kube/HelloWorldService.class
+kube/WorkerApp.class

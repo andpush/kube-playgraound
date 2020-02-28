@@ -1,0 +1,95 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "spring-api"
+  namespace: "default"
+  labels:
+    app: "spring-api"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "spring-api"
+  template:
+    metadata:
+      labels:
+        app: "spring-api"
+    spec:
+      containers:
+      - name: "spring-api"
+        image: "eu.gcr.io/kube2020-266915/backend-app:latest"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "spring-worker"
+  namespace: "default"
+  labels:
+    app: "spring-worker"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "spring-worker"
+  template:
+    metadata:
+      labels:
+        app: "spring-worker"
+    spec:
+      containers:
+      - name: "spring-worker"
+        image: "eu.gcr.io/kube2020-266915/worker-app:latest"
+---
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "spring-app-hpa"
+  namespace: "default"
+  labels:
+    app: "spring-worker"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "spring-worker"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: "Pods"
+    pods:
+      name: "my_custom_metric"
+      targetAverageValue: 3
+
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "spring-api-service"
+  namespace: "default"
+  labels:
+    app: "spring-api"
+spec:
+  ports:
+  - protocol: "TCP"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: "spring-api"
+  type: "LoadBalancer"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "spring-worker-service"
+  namespace: "default"
+  labels:
+    app: "spring-worker"
+spec:
+  ports:
+  - protocol: "TCP"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: "spring-worker"
+  type: "ClusterIP"

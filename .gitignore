@@ -1,0 +1,7 @@
+.DS_Store
+.terraform/*
+.idea/*
+.iml
+.tfstate
+.backup
+creds/*
